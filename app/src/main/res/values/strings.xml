@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">tinBitoo</string>
+    <string name="avisoPriv">Aviso de privaciad</string>
+
+    <string name="usuario">Usuario</string>
+    <string name="contrasena">Constraseña</string>
+    <string name="loginBtn">Iniciar sesión</string>
+    <string name="omitirLogin">Omitir por ahora</string>
+</resources>
