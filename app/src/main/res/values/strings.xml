@@ -6,4 +6,17 @@
     <string name="contrasena">Constraseña</string>
     <string name="loginBtn">Iniciar sesión</string>
     <string name="omitirLogin">Omitir por ahora</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_productos">Productos</string>
+    <string name="title_promociones">Promociones</string>
+    <string name="title_perfil">Perfil</string>
+    <string name="fragment_productos">Productos</string>
+    <string name="fragment_promociones">Promociones</string>
+    <!-- TODO: Remove or change this placeholder text -->
+
+    <string name="nombreUsuario">Nombre de usuario</string>
+    <string name="correoUsuario">usuario@usuario.com</string>
+
+    <string name="btn_login">Iniciar sesión</string>
 </resources>

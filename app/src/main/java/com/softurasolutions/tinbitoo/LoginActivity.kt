@@ -42,8 +42,15 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+
         loginBtn?.setOnClickListener{
             login()
+        }
+
+        omitirLogin?.setOnClickListener{
+            val intent = Intent(applicationContext, MainActivity::class.java)
+            startActivity(intent)
+            finish()
         }
 
         val prefs = applicationContext.getSharedPreferences("Preferences", MODE_PRIVATE)
@@ -52,8 +59,11 @@ class LoginActivity : AppCompatActivity() {
         val token = prefs.getString("token","")
 
         if (usuario != "" && token != ""){
-            //val intent = Intent(applicationContext,)
             Log.e("Login"," Usuario?? $usuario")
+            val intent = Intent(applicationContext, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+
         }else{
             Log.e("Login"," Inicia Sesión")
             editor = prefs.edit()
@@ -112,6 +122,9 @@ class LoginActivity : AppCompatActivity() {
 
                             runOnUiThread {
                                 Toast.makeText(applicationContext,"Bienvenido $nombreCompleto", Toast.LENGTH_LONG).show()
+                                val intent = Intent(applicationContext, MainActivity::class.java)
+                                startActivity(intent)
+                                finish()
                             }
 
                         }else{
