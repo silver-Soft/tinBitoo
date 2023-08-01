@@ -11,7 +11,7 @@
     <color name="blueDark">#006FC6</color>
     <color name="red">#D6171E</color>
     <color name="green">#00A509</color>
-
+    <color name="blueSky">#0066B6</color>
     <color name="orange">#FA4F00</color>
     <color name="pink">#FF0084</color>
 </resources>

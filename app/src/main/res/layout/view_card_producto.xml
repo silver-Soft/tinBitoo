@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/backgroundCard"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="5dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="@color/white"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:id="@+id/img_producto"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:contentDescription="Imgen producto"
+            android:src="@drawable/carita_tin2"
+            android:visibility="visible"/>
+
+        <TextView
+            android:id="@+id/txt_url"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginRight="5dp"
+            android:layout_toEndOf="@+id/img_producto"
+            android:layout_toStartOf="@+id/deleteProducto"
+            android:background="@drawable/texview_badge_sqare_blue"
+            android:gravity="center"
+            android:text="URL"
+            android:textColor="@color/white"
+            android:textSize="8dp" />
+
+        <TextView
+            android:id="@+id/txt_descripcion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txt_url"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginRight="5dp"
+            android:layout_toEndOf="@+id/img_producto"
+            android:layout_toStartOf="@+id/deleteProducto"
+            android:gravity="center"
+            android:text="URL"
+            android:textColor="@color/black"
+            android:textSize="10dp" />
+
+
+<ImageView
+    android:id="@+id/deleteProducto"
+    android:layout_width="25dp"
+    android:layout_height="25dp"
+    android:layout_alignParentEnd="true"
+    android:layout_centerVertical="true"
+    android:layout_marginEnd="15dp"
+    android:src="@drawable/ic_delete"
+    />
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -28,6 +29,7 @@ class HomeFragment : Fragment() {
     private var charItem: ArrayList<ModeloCard>?=null
     private var gridLayoutManager : GridLayoutManager ?= null
     private var aplhaAdapter :  Adapter?=null
+    private var loaderHome: RelativeLayout?=null
     private var settingsConst = SettingsConst()
 
     override fun onCreateView(
@@ -47,7 +49,7 @@ class HomeFragment : Fragment() {
         recyclerview?.layoutManager = gridLayoutManager
 
         recyclerview?.setHasFixedSize(true)
-
+        loaderHome = binding.loaderHome
         val negocios : ArrayList<ModeloCard> = ArrayList()
 
         val cadena = "{\"filtros\":{\"organizacion\":null,\"id_persona\":null}}"
@@ -59,6 +61,7 @@ class HomeFragment : Fragment() {
         )
         try {
             val thread = Thread{
+                loaderHome!!.visibility = View.VISIBLE
                 if(settingsConst.hayConexion(requireContext())){
 
                     val response = servicioTask.execute().get()
@@ -104,17 +107,24 @@ class HomeFragment : Fragment() {
                                 charItem = negocios
                                 aplhaAdapter = Adapter(requireContext(), charItem!!)
                                 recyclerview?.adapter = aplhaAdapter
-
+                                loaderHome!!.visibility = View.GONE
                             }
                         }catch (e: JSONException){
                             e.printStackTrace()
+                            loaderHome!!.visibility = View.GONE
                         }
                     }else{
-                        Toast.makeText(requireContext(), message[0].toString(), Toast.LENGTH_LONG).show()
+                        requireActivity().runOnUiThread {
+                            Toast.makeText(requireContext(), message[0].toString(), Toast.LENGTH_SHORT).show()
+                            loaderHome!!.visibility = View.GONE
+                        }
                     }
 
                 }else{
-                    Toast.makeText(requireContext(), "¡No hay conexión!", Toast.LENGTH_SHORT).show()
+                    requireActivity().runOnUiThread {
+                        loaderHome!!.visibility = View.GONE
+                        Toast.makeText(requireContext(), "No hay conexión", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             thread.start()

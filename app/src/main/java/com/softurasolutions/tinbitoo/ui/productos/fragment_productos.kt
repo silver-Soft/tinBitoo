@@ -1,60 +1,213 @@
 package com.softurasolutions.tinbitoo.ui.productos
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.view.setMargins
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.client.android.BeepManager
+import com.journeyapps.barcodescanner.BarcodeCallback
+import com.journeyapps.barcodescanner.BarcodeResult
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import com.journeyapps.barcodescanner.DefaultDecoderFactory
 import com.softurasolutions.tinbitoo.R
+import com.softurasolutions.tinbitoo.databinding.FragmentProductosBinding
+import java.io.UnsupportedEncodingException
+import java.util.Objects
+import java.util.concurrent.TimeUnit
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [fragment_productos.newInstance] factory method to
- * create an instance of this fragment.
- */
 class fragment_productos : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private val CODIGO_PERMISO_CAMARA = 2108
+    private var _binding : FragmentProductosBinding?=null
+    private val binding get() = _binding
+
+    private var barcodeView : DecoratedBarcodeView?= null
+    private var beepManager : BeepManager?=null
+    private var  switchFlashButton: FloatingActionButton ?= null
+    private var qrScannerView : DecoratedBarcodeView?= null
+    private var  toggleScannerView: CardView?= null
+    private var recyclerViewProductos: RecyclerView?=null
+    private var flash: Boolean = false
+    private var scannerVisibe : Boolean = true
+    private var productosListy: ArrayList<ModeloProductos> = ArrayList()
+    private var items :ArrayList<ModeloProductos>?= null
+    private var itemsAdapters: AdapterProductos? = null
+
+    private val callback: BarcodeCallback = BarcodeCallback { result ->
+        barcodeView?.resume()
+        vibratePhone()
+        if (result!!.text == null){
+            Toast.makeText(requireContext(), "No se ha escaneado nada", Toast.LENGTH_SHORT).show()
+            try {
+                TimeUnit.SECONDS.sleep(1)
+            }catch (e: InterruptedException){
+                e.printStackTrace()
+            }
+        } else if(result.text != null){
+            barcodeView!!.setStatusText(result.text)
+            beepManager!!.playBeepSound()
+            TimeUnit.SECONDS.sleep(1)
+            try {
+                Log.e("CODE","---> ${result.text}")
+                productosListy.add(ModeloProductos(result.text,"https://es.qr-code-generator.com/wp-content/themes/qr/new_structure/assets/media/images/exit_intent/hand-holding-free-qr-codes.png",result.text))
+
+                if(isAdded){
+                    requireActivity().runOnUiThread{
+                        items = ArrayList()
+                        items = productosListy
+                        itemsAdapters = AdapterProductos(requireContext(), items!!)
+                        recyclerViewProductos?.adapter = itemsAdapters
+                    }
+                }
+
+            }catch (e: UnsupportedEncodingException){
+                e.printStackTrace()
+            }
         }
     }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_productos, container, false)
+    ): View {
+        _binding = FragmentProductosBinding.inflate(inflater, container, false)
+        return  binding!!.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment fragment_productos.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            fragment_productos().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        checkPermission()
+
+        barcodeView = binding!!.zxingBarcodeScanner
+        qrScannerView = binding!!.zxingBarcodeScanner
+        qrScannerView!!.setTorchOff()
+        switchFlashButton = binding!!.floatingTurnFlash
+        recyclerViewProductos = binding!!.recyclerViewProductos
+        toggleScannerView = binding!!.toggleScanner
+        val toggleContainer = binding!!.toggleCXontainer
+        val layoutParams = toggleContainer.layoutParams as ViewGroup.MarginLayoutParams
+        val arrow : ImageView = binding!!.arrow
+
+        val formats: Collection<BarcodeFormat> =
+        listOf(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39)
+
+        barcodeView!!.barcodeView.decoderFactory = DefaultDecoderFactory(formats)
+        barcodeView!!.initializeFromIntent(requireActivity().intent)
+        barcodeView!!.decodeContinuous(callback)
+        barcodeView!!.setStatusText("Enfoque un código")
+        beepManager = BeepManager(requireActivity())
+
+        val layoutManager = LinearLayoutManager(requireContext())
+        recyclerViewProductos?.layoutManager = layoutManager
+
+        switchFlashButton!!.setOnClickListener {
+            flash = if(!flash){
+                barcodeView!!.setTorchOn()
+                true
+            }else{
+                barcodeView!!.setTorchOff()
+                false
             }
+        }
+
+        toggleScannerView!!.setOnClickListener {
+            scannerVisibe = if (scannerVisibe){
+                barcodeView!!.pause()
+                barcodeView!!.animate()
+                    .alpha(0.0f)
+                    .setDuration(300)
+                    .withEndAction{
+                        barcodeView!!.visibility = View.GONE
+                        barcodeView!!.alpha = 1.0f
+                    }
+                layoutParams.setMargins(0, 10, 0, 10)
+                arrow.setImageResource(R.drawable.arrow_circle_down)
+                false
+            }else{
+                barcodeView!!.resume()
+                barcodeView!!.animate()
+                    .alpha(1.0f)
+                    .setDuration(300)
+                    .setListener(null)
+
+                barcodeView!!.visibility = View.VISIBLE
+
+                layoutParams.setMargins(0, -20, 0, 0)
+                arrow.setImageResource(R.drawable.arrow_circle_up)
+                true
+            }
+        }
+
+
     }
+
+    private  fun checkPermission(){
+        if(ContextCompat.checkSelfPermission(
+                Objects.requireNonNull(
+                    requireContext()
+                ),
+                Manifest.permission.CAMERA
+        ) != PackageManager.PERMISSION_GRANTED
+        ){
+         requestPermissions(arrayOf(Manifest.permission.CAMERA), CODIGO_PERMISO_CAMARA)
+        }else if(ContextCompat.checkSelfPermission(
+                Objects.requireNonNull(
+                    requireContext()
+                ),
+                Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+        ){
+            //PERMISOS HAN SIDO CONCEDIDOS
+        }
+    }
+
+    fun vibratePhone(){
+        val vibrador = requireActivity().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        vibrador.vibrate(VibrationEffect.createOneShot(400, VibrationEffect.DEFAULT_AMPLITUDE))
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        barcodeView!!.destroyDrawingCache()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        barcodeView!!.resume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        barcodeView!!.pause()
+    }
+
+
+
+
+
+
+
+
+
 }
